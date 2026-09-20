@@ -21,9 +21,21 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22.12
           cache: npm
-      - run: npm ci --legacy-peer-deps
+      - name: Install dependencies
+        run: |
+          set +e
+          npm ci --legacy-peer-deps > /tmp/install.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/install.log
+          if [ "$status" -ne 0 ]; then
+            tail -n 40 /tmp/install.log | while IFS= read -r line; do
+              echo "::error::${line}"
+            done
+            exit "$status"
+          fi
       - run: npm run generate
       - name: Add .nojekyll
         run: touch .output/public/.nojekyll
