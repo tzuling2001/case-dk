@@ -24,12 +24,14 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: |
-          set -o pipefail
           node -v
           npm -v
           rm -f yarn.lock
-          npm install --legacy-peer-deps 2>&1 | tee /tmp/install.log
-          status=${PIPESTATUS[0]}
+          set +e
+          npm install --legacy-peer-deps > /tmp/install.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/install.log
           {
             echo '## npm install log'
             echo '```'
@@ -40,8 +42,8 @@ jobs:
             tail -n 40 /tmp/install.log | while IFS= read -r line; do
               echo "::error::${line}"
             done
+            exit "$status"
           fi
-          exit "$status"
       - run: npm run generate
       - name: Add .nojekyll
         run: touch .output/public/.nojekyll
