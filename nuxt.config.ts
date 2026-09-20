@@ -14,6 +14,7 @@ export default defineNuxtConfig({
     plugins: [tailwindcss()],
   },
   app: {
+    baseURL: '/case-dk/',
     head: {
       charset: 'utf-8',
       viewport: 'width=device-width, initial-scale=1',
