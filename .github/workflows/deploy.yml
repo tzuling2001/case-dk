@@ -31,7 +31,7 @@ jobs:
           set -e
           cat /tmp/install.log
           if [ "$status" -ne 0 ]; then
-            tail -n 40 /tmp/install.log | while IFS= read -r line; do
+            tail -n 50 /tmp/install.log | while IFS= read -r line; do
               echo "::error::${line}"
             done
             exit "$status"
