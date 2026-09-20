@@ -22,13 +22,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
       - name: Install dependencies
         run: |
           set -o pipefail
           node -v
           npm -v
-          npm install 2>&1 | tee /tmp/install.log
+          rm -f yarn.lock
+          npm install --legacy-peer-deps 2>&1 | tee /tmp/install.log
           status=${PIPESTATUS[0]}
           {
             echo '## npm install log'
@@ -36,7 +36,12 @@ jobs:
             tail -n 120 /tmp/install.log
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          exit $status
+          if [ "$status" -ne 0 ]; then
+            tail -n 40 /tmp/install.log | while IFS= read -r line; do
+              echo "::error::${line}"
+            done
+          fi
+          exit "$status"
       - run: npm run generate
       - name: Add .nojekyll
         run: touch .output/public/.nojekyll
